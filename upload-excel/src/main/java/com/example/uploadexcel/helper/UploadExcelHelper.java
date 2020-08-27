@@ -1,6 +1,6 @@
 package com.example.uploadexcel.helper;
 
-import java.io.IOException;
+//import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,34 +21,48 @@ public class UploadExcelHelper {
 		try {
 			
 			Workbook workbook = new XSSFWorkbook(is);
-			Sheet sheet = workbook.getSheetAt(0);
-		    Iterator<Row> rows = sheet.iterator();
+			
+			if (workbook == null) 
+			{
+                throw new Exception("workbook is empty！");
+            }
+			
+			
+			List<StockPrice> priceList = new ArrayList<StockPrice>();
+			
+			int n = workbook.getNumberOfSheets();
+			
+			for(int i = 0; i < n; i++) {
+				
+				Sheet sheet = workbook.getSheetAt(0);
+			    Iterator<Row> rows = sheet.iterator();
+			    rows.next();
+			    
+			    
+			    while(rows.hasNext()) {
+			    	Row currentRow = rows.next();
+			    	Iterator<Cell> cells = currentRow.iterator();
+			    	
+			    	StockPrice sp = new StockPrice();
+			    	
+			    	sp.setCompanyCode(cells.next().getStringCellValue());
+			    	sp.setStockExchange(cells.next().getStringCellValue());
+			    	sp.setCurrentPrice(cells.next().getNumericCellValue());
+			    	sp.setDate(cells.next().getDateCellValue());
+			    	sp.setTime(cells.next().getStringCellValue());
+			    	
+			    	priceList.add(sp);
+			    	
+			    	
+			    }	
+				
+			}
 		    
-		    List<StockPrice> priceList = new ArrayList<StockPrice>();
-		    
-		    int rowNo = 1;
-		    
-		    while(rows.hasNext()) {
-		    	Row currentRow = rows.next();
-		    	Iterator<Cell> cells = currentRow.iterator();
-		    	
-		    	StockPrice sp = new StockPrice();
-		    	
-		    	sp.setCompanyCode((long)cells.next().getNumericCellValue());
-		    	sp.setStockExchange(cells.next().getStringCellValue());
-		    	sp.setCurrentPrice(cells.next().getNumericCellValue());
-		    	sp.setDate(cells.next().getLocalDateTimeCellValue());
-		    	sp.setTime(cells.next().getLocalDateTimeCellValue());
-		    	
-		    	
-		    	
-		    }
-		    
-		    
+		    workbook.close();	   
 		    return priceList;
 		}
 		
-		catch(IOException e) {
+		catch(Exception e) {
 			throw new RuntimeException("Failed to parse file " + e.getMessage());
 		}
 		
